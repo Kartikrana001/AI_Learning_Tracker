@@ -1,8 +1,18 @@
 topics=[]
+try:
+    with open("topics.txt","r") as file:
+        lines = file.readlines()
+    for line in lines:
+        topic,progress= line.strip().split(",")
+        topics.append(({"topic":topic,"progress": float(progress)}))
+except FileNotFoundError:
+     print("previous data is not present...")
 def add():
         new_topic=input("Enter the topic: ")
         progress= float(input("Enter how much percent it is complete: "))
         topics.append({"topic": new_topic,"progress": progress})
+        with open("topics.txt","a") as file:
+            file.write(f"{new_topic},{progress}\n")
 def view_topics():
     if len(topics) == 0:
              print("No topic found...")
