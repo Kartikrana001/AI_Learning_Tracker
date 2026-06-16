@@ -19,14 +19,29 @@ def view_topics():
     else:
         for item in topics:
             print(item["topic"], "-", item["progress"], "%")
+def updt_progress():
+     topic_find=input("Enter the topic : ")
+     for topic in topics:
+        if topic["topic"] == topic_find:
+            new_progress=float(input("Enter the new progress :"))
+            topic["progress"] = new_progress
+            with open("topics.txt","w") as file :
+                for topic in topics:
+                    file.write(f"{topic['topic']},{topic['progress']}\n")         
+            print("progress updated...")
+            return
+     print("topic not found...")
+
 while True:
-    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC  : 1\nVIEW TOPIC : 2\nEXIT       : 3")
-    user_choise = int(input("Enter your choise: "))
-    if user_choise == 1:
+    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nEXIT             : 4")
+    user_choise = input("Enter your choise: ")
+    if   user_choise == "1":
         add()
-    elif user_choise == 2:
+    elif user_choise == "2":
         view_topics()
-    elif user_choise == 3:
+    elif user_choise == "3":
+        updt_progress()
+    elif user_choise == "4":
         break
     else:
          print("invelic choice...")
