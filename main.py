@@ -49,10 +49,18 @@ def statistics():
     total_topic = len(topics)
     print("total topics : ",total_topic)
     total_progress = 0
+    comp_topic = 0
+    high_progress = topics[0]
     for topic in topics:
+        if topic["progress"] > high_progress["progress"]:
+            high_progress = topic
+        if topic["progress"] == 100:
+            comp_topic +=1
         total_progress += topic['progress']
     average = total_progress/len(topics)
     print(f"AVERAGE PROGRESS :{average}%")
+    print(f"COMPLETED TOPICS :{comp_topic}")
+    print(f"HIGHEST PROGRESS TOPIC : {high_progress['topic']} ({high_progress['progress']}%)")
 while True:
     print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nSTATISTICS       : 5\nEXIT             : 6")
     user_choice = input("Enter your choise: ")
