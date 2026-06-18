@@ -42,9 +42,19 @@ def delete_topic():
             print("topic deleted successfully...")
             return
      print("topic not found...")
-
+def statistics():
+    if len(topics) == 0:
+        print("No topic found...")
+        return
+    total_topic = len(topics)
+    print("total topics : ",total_topic)
+    total_progress = 0
+    for topic in topics:
+        total_progress += topic['progress']
+    average = total_progress/len(topics)
+    print(f"AVERAGE PROGRESS :{average}%")
 while True:
-    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nEXIT             : 5")
+    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nSTATISTICS       : 5\nEXIT             : 6")
     user_choice = input("Enter your choise: ")
     if   user_choice == "1":
         add()
@@ -55,6 +65,8 @@ while True:
     elif user_choice == "4":
         delete_topic()
     elif user_choice == "5":
+        statistics()
+    elif user_choice == "6":
         break
     else:
          print("invelic choice...")
