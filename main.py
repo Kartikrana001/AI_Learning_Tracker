@@ -61,8 +61,15 @@ def statistics():
     print(f"AVERAGE PROGRESS :{average}%")
     print(f"COMPLETED TOPICS :{comp_topic}")
     print(f"HIGHEST PROGRESS TOPIC : {high_progress['topic']} ({high_progress['progress']}%)")
+def search_topic():
+    find_topic = input("Enter the topic: ")
+    for topic in topics:
+        if topic["topic"].lower() == find_topic.lower():
+            print(f"{topic['topic']} - {topic['progress']}% ")
+            return
+    print("topic not found...")
 while True:
-    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nSTATISTICS       : 5\nEXIT             : 6")
+    print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nSTATISTICS       : 5\nSEARCH TOPIC     : 6\nEXIT             : 7")
     user_choice = input("Enter your choise: ")
     if   user_choice == "1":
         add()
@@ -75,6 +82,8 @@ while True:
     elif user_choice == "5":
         statistics()
     elif user_choice == "6":
+        search_topic()
+    elif user_choice == "7":
         break
     else:
          print("invelic choice...")
