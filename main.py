@@ -8,8 +8,15 @@ try:
 except FileNotFoundError:
      print("previous data is not present...")
 def add():
-        new_topic=input("Enter the topic: ")
+        new_topic=input("Enter the topic: ").strip()
+        for topic in topics:
+            if topic['topic'].lower() == new_topic.lower():
+                print("topic already exists...")
+                return
         progress= float(input("Enter how much percent it is complete: "))
+        if progress < 0 or progress > 100:
+            print("progress can be in bitween 0 to 100...")
+            return
         topics.append({"topic": new_topic,"progress": progress})
         with open("topics.txt","a") as file:
             file.write(f"{new_topic},{progress}\n")
@@ -24,6 +31,9 @@ def updt_progress():
      for topic in topics:
         if topic["topic"].lower() == topic_find.lower():
             new_progress=float(input("Enter the new progress :"))
+            if new_progress < 0 or new_progress > 100:
+                print("progress can be in bitween 0 to 100...")
+                return
             topic["progress"] = new_progress
             with open("topics.txt","w") as file :
                 for topic in topics:
@@ -57,7 +67,7 @@ def statistics():
         if topic["progress"] == 100:
             comp_topic +=1
         total_progress += topic['progress']
-    average = total_progress/len(topics)
+    average = round(total_progress/len(topics),2)
     print(f"AVERAGE PROGRESS :{average}%")
     print(f"COMPLETED TOPICS :{comp_topic}")
     print(f"HIGHEST PROGRESS TOPIC : {high_progress['topic']} ({high_progress['progress']}%)")
