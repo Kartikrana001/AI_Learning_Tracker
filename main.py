@@ -1,109 +1,57 @@
-# Load saved data from file when program starts 
-topics=[]
-try:
-    with open("topics.txt","r") as file:
-        lines = file.readlines()
-    for line in lines:
-        topic,progress= line.strip().split(",")
-        topics.append(({"topic":topic,"progress": float(progress)}))
-except FileNotFoundError:
-     print("previous data is not present...")
-# Add a new topic and save it in file
-def add():
-        new_topic=input("Enter the topic: ").strip()
-        # prevent duplicate topic names
-        for topic in topics:
-            if topic['topic'].lower() == new_topic.lower():
-                print("topic already exists...")
-                return
-        progress= float(input("Enter how much percent it is complete: "))
-        # Validate progress range
-        if progress < 0 or progress > 100:
-            print("progress can be in bitween 0 to 100...")
-            return
-        topics.append({"topic": new_topic,"progress": progress})
-        with open("topics.txt","a") as file:
-            file.write(f"{new_topic},{progress}\n")
-# Display all topics
-def view_topics():
-    if len(topics) == 0:
-             print("No topic found...")
-    else:
-        for item in topics:
-            print(item["topic"], "-", item["progress"], "%")
-# Update progress of an existing topic
-def updt_progress():
-     topic_find=input("Enter the topic : ")
-     for topic in topics:
-        if topic["topic"].lower() == topic_find.lower():
-            new_progress=float(input("Enter the new progress :"))
-            if new_progress < 0 or new_progress > 100:
-                print("progress can be in bitween 0 to 100...")
-                return
-            topic["progress"] = new_progress
-            # Rewrite complete file with updated data
-            with open("topics.txt","w") as file :
-                for topic in topics:
-                    file.write(f"{topic['topic']},{topic['progress']}\n")         
-            print("progress updated...")
-            return
-     print("topic not found...")
-# Delete a topic from list and file
-def delete_topic():
-     del_topic= input("Enter the topic to be deleted :")
-     for topic in topics:
-        if topic["topic"].lower() == del_topic.lower():
-            topics.remove(topic)
-            with open("topics.txt","w") as file:
-                for topic in topics:
-                    file.write(f"{topic['topic']},{topic['progress']}\n")
-            print("topic deleted successfully...")
-            return
-     print("topic not found...")
+import database
+database.create_table()
 # Show learning status
 def statistics():
-    if len(topics) == 0:
-        print("No topic found...")
+    topic_data = database.view_topics()
+    if len(topic_data) == 0:
+        print("data not found...")
         return
-    total_topic = len(topics)
-    print("total topics : ",total_topic)
-    total_progress = 0
-    comp_topic = 0
-    high_progress = topics[0]
-    for topic in topics:
-        if topic["progress"] > high_progress["progress"]:
-            high_progress = topic
-        if topic["progress"] == 100:
-            comp_topic +=1
-        total_progress += topic['progress']
-    average = round(total_progress/len(topics),2)
-    print(f"AVERAGE PROGRESS :{average}%")
-    print(f"COMPLETED TOPICS :{comp_topic}")
-    print(f"HIGHEST PROGRESS TOPIC : {high_progress['topic']} ({high_progress['progress']}%)")
-# Search a topic by name
-def search_topic():
-    find_topic = input("Enter the topic: ")
-    for topic in topics:
-        if topic["topic"].lower() == find_topic.lower():
-            print(f"{topic['topic']} - {topic['progress']}% ")
-            return
-    print("topic not found...")
+    sum_progress = 0
+    completed_topic = 0
+    for progress in topic_data:
+        sum_progress += progress[2]
+        if progress[2] == 100:
+            completed_topic +=1
+    average_progress = sum_progress/ len(topic_data)
+    high_progress = topic_data[0]
+    low_progress =  topic_data[0]
+    for progress in topic_data:
+        if high_progress[2] < progress[2]:
+            high_progress =progress
+        if low_progress[2] > progress[2]:
+            low_progress = progress
+    print(f"TOTAL TOPICS    : {len(topic_data)}")
+    print(f"AVERAGE PROGRESS: {average_progress}")
+    print(f"COMPLETED TOPIC : {completed_topic}")
+    print(f"HIGHEST PROGRESS: {high_progress[1]} {high_progress[2]}")
+    print(f"LOWEST PROGRESS : {low_progress[1]} {low_progress[2]}")
+
 # Main menu loop
 while True:
     print("=====AI LEARNING TRACKER=====\n\nADD TOPIC        : 1\nVIEW TOPIC       : 2\nUPDATE PROGRESS  : 3\nDELETE TOPIC     : 4\nSTATISTICS       : 5\nSEARCH TOPIC     : 6\nEXIT             : 7")
     user_choice = input("Enter your choise: ")
     if   user_choice == "1":
-        add()
+        topic = input("Enter the topic: ")
+        progress = float(input("Enter the progress: "))
+        database.add_topic(topic,progress)
+
     elif user_choice == "2":
-        view_topics()
+        c = database.view_topics()
+        for topic in c:
+            print(f"{topic[0]} {topic[1]}: {topic[2]}%")
     elif user_choice == "3":
-        updt_progress()
+        topic = input("Enter the topic: ")
+        progress = float(input("Enter the progress: "))
+        database.update_topic(topic,progress)
     elif user_choice == "4":
-        delete_topic()
+        topic = input("Enter the topic: ")
+        database.delete_topic(topic)
     elif user_choice == "5":
         statistics()
+
     elif user_choice == "6":
-        search_topic()
+        topic = input("Enter the topic: ")
+        print(database.search_topic(topic))
     elif user_choice == "7":
         break
     else:

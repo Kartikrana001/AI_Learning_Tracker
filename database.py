@@ -1,10 +1,41 @@
 import sqlite3
-conn = sqlite3.connect("learning.db")
-cursor = conn.cursor()
-cursor.execute("""CREATE TABLE IF NOT EXISTS topics(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    topic TEXT NOT NULL,
-                    progress REAL NOT NULL 
-                    )""")
-conn.commit()
-conn.close()
+def create_table():
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS topics(
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            topic TEXT NOT NULL,
+                            progress REAL NOT NULL 
+                            )""")
+    
+def add_topic(topic,progress):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO topics(topic,progress) VALUES(?,?)",(topic,progress))
+
+def view_topics():
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM topics")
+        c=cursor.fetchall()
+        return c
+
+def update_topic(topic,progress):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE topics SET progress = ? WHERE topic = ?",(progress,topic))
+
+def delete_topic(topic):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM topics WHERE topic = ?",(topic,))
+
+def search_topic(topic):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM topics WHERE topic = ?",(topic,))
+        result = cursor.fetchone()
+        if result is None:
+            return "topic is not present..."
+        else:
+            return result
