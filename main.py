@@ -1,3 +1,4 @@
+# import and created database
 import database
 database.create_table()
 # Show learning status
@@ -33,7 +34,10 @@ while True:
     if   user_choice == "1":
         topic = input("Enter the topic: ")
         progress = float(input("Enter the progress: "))
-        database.add_topic(topic,progress)
+        if progress < 0 or progress > 100:
+            print("invalid progress...")
+        else:
+            database.add_topic(topic,progress)
 
     elif user_choice == "2":
         c = database.view_topics()
@@ -42,7 +46,10 @@ while True:
     elif user_choice == "3":
         topic = input("Enter the topic: ")
         progress = float(input("Enter the progress: "))
-        database.update_topic(topic,progress)
+        if progress < 0 or progress > 100:
+            print("invalid progress...")
+        else:
+            database.update_topic(topic,progress)
     elif user_choice == "4":
         topic = input("Enter the topic: ")
         database.delete_topic(topic)
