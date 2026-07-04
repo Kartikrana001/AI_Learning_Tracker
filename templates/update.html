@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Update Topic</h2>
+    <form method="POST">
+        <input 
+            type="text"
+            name="topic" value="{{ topic[1] }}"
+            class="form-control mb-3">
+        <input
+            type="number"
+            name="progress"
+            value="{{ topic[2] }}"
+            class="form-control mb-3">
+        <button type="submit" class="btn btn-primary">
+            Update
+        </button>
+    </form>
+</div>
+{% endblock %}

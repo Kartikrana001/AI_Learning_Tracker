@@ -20,15 +20,15 @@ def view_topics():
         c=cursor.fetchall()
         return c
 
-def update_topic(topic,progress):
+def update_topic(id,topic,progress):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE topics SET progress = ? WHERE topic = ?",(progress,topic))
+        cursor.execute("UPDATE topics SET topic=?, progress=? WHERE id=?",(topic,progress,id))
 
-def delete_topic(topic):
+def delete_topic(id):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM topics WHERE topic = ?",(topic,))
+        cursor.execute("DELETE FROM topics WHERE id = ?",(id,))
 
 def search_topic(topic):
     with sqlite3.connect("learning.db") as conn:
@@ -39,3 +39,8 @@ def search_topic(topic):
             return "topic is not present..."
         else:
             return result
+def get_topic(id):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM topics WHERE id=?",(id,))
+        return cursor.fetchone()

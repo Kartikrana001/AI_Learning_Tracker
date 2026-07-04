@@ -13,6 +13,42 @@
     <a href="#" class="btn btn-primary btn-lg mt-3">
         Get Started
     </a>
+    <form method="POST" class="mt-4">
+        <input type="text" 
+            name="topic" 
+            class="form-control mb-3" 
+            placeholder="Enter Topic">
+        
+        <button type="submit" class="btn btn-success">
+            Add Topic
+        </button>
+    </form>
+    <h2 class="mt-5">Topics</h2>
+
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Topic</th>
+                <th>Progress</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for topic in topics %}
+            <tr>
+                <td>{{ topic[0] }}</td>
+                <td>{{ topic[1] }}</td>
+                <td>{{ topic[2] }}%</td>
+                <td>
+                    <a href="/update/{{ topic[0] }}" class="btn btn-warning btn-sm">Update</a>
+                    <a href="/delete/{{ topic[0] }}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
 
