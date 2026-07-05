@@ -43,11 +43,11 @@ def delete(id):
 def update(id):
     if request.method == "POST":
         topic = request.form['topic'].strip()
-        if topic == "":
-            flash("invalid topic!","danger")
         progress = float(request.form["progress"])
-        if progress < 0 or progress > 100:
-            flash("invalid progress!","danger")
+        if topic == "":
+            flash("Invalid topic!","danger")
+        elif progress < 0 or progress > 100:
+            flash("Invalid progress!","danger")
         else:
             database.update_topic(id,topic,progress)
             flash("Topic updated successfully!","warning")

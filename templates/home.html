@@ -27,11 +27,12 @@
         <input
             type="text"
             name="search"
+            value="{{ request.args.get('search','') }}"
             class="form-control"
             placeholder="Search Topic">
-        <button class="btn btn-info mt-2">
-            Search
-        </button>
+        <button class="btn btn-info mt-2">Search</button>
+        <a href="/" class="btn btn-warning mt-2">Clear Search</a>
+
     </form>
     <h2 class="mt-5">Topics</h2>
 
