@@ -34,13 +34,16 @@ def search_topic(topic):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM topics WHERE topic = ?",(topic,))
-        result = cursor.fetchone()
-        if result is None:
-            return "topic is not present..."
-        else:
-            return result
+        result = cursor.fetchall()
+        return result
 def get_topic(id):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM topics WHERE id=?",(id,))
         return cursor.fetchone()
+def topic_exists(topic):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM topics WHERE topic = ?",(topic,))
+        result = cursor.fetchone()
+        return result != None
