@@ -10,7 +10,7 @@
         An AI-powered platform that helps students plan, track and improve their learning.
     </p>
 
-    <a href="#" class="btn btn-primary btn-lg mt-3">
+    <a href="/login" class="btn btn-primary btn-lg mt-3">
         Get Started
     </a>
     <form method="POST" class="mt-4">
@@ -51,7 +51,32 @@
             <tr>
                 <td>{{ topic[0] }}</td>
                 <td>{{ topic[1] }}</td>
-                <td>{{ topic[2] }}%</td>
+                <td>
+                    <div class="progress">
+                        {% if topic[2] < 40 %}
+                            <div
+                                class="progress-bar bg-danger"
+                                role="progressbar"
+                                style="width: {{ topic[2] }}%;">
+                                {{ topic[2] }}%
+                            </div>
+                        {% elif topic[2] < 80 %}
+                            <div
+                                class="progress-bar bg-warning"
+                                role="progressbar"
+                                style="width: {{ topic[2] }}%;">
+                                {{ topic[2] }}%
+                            </div>
+                        {% else %}
+                            <div
+                                class="progress-bar bg-success"
+                                role="progressbar"
+                                style="width: {{ topic[2] }}%;">
+                                {{ topic[2] }}%
+                            </div>  
+                        {% endif %}                  
+                    </div>
+                </td>
                 <td>
                     <a href="/update/{{ topic[0] }}" class="btn btn-warning btn-sm">Update</a>
                     <a href="/delete/{{ topic[0] }}" class="btn btn-danger btn-sm">Delete</a>

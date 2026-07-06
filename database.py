@@ -33,7 +33,7 @@ def delete_topic(id):
 def search_topic(topic):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM topics WHERE topic = ?",(topic,))
+        cursor.execute("SELECT * FROM topics WHERE topic LIKE ?",('%'+topic+'%',))
         result = cursor.fetchall()
         return result
 def get_topic(id):
