@@ -10,8 +10,9 @@ h1{
 p{
     font-size: 18px;
 }
-.container{
-    margin-top: 10px;
+.auth-container{
+    min-height: calc(100vh - 70px);
+    padding-top: 30px;
 }
 
 .btn{
