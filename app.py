@@ -1,5 +1,6 @@
 from flask import Flask,render_template,request,redirect, url_for,flash
-from flask_login import LoginManager,UserMixin,login_user,login_required
+from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
+from werkzeug.security import generate_password_hash,check_password_hash 
 import database
 database.create_table()
 database.user_login()
@@ -9,6 +10,7 @@ app.secret_key = "learning_tracker_secret"
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.login_message = None
 
 class User(UserMixin):
     def __init__(self,id,name,email):
@@ -28,25 +30,25 @@ def home():
     search = request.args.get("search")
 
     if search:
-        tp = database.search_topic(search)
+        tp = database.search_topic(search,current_user.id)
 
         if not tp:
             flash("Topic not found!", "danger")
-            tp = database.view_topics()
+            tp = database.view_topics(current_user.id)
 
     else:
-        tp = database.view_topics()
+        tp = database.view_topics(current_user.id)
     if request.method == "POST":
         topic = request.form["topic"].strip()
 
         if topic == "":
             flash("Invalid topic!", "danger")
 
-        elif database.topic_exists(topic):
+        elif database.topic_exists(topic,current_user.id):
             flash("Topic already exists!", "danger")
 
         else:
-            database.add_topic(topic, 0)
+            database.add_topic(topic, 0,current_user.id)
             flash("Topic added successfully!", "success")
 
         return redirect(url_for("home"))
@@ -56,7 +58,7 @@ def home():
 @app.route("/delete/<int:id>")
 @login_required
 def delete(id):
-    database.delete_topic(id)
+    database.delete_topic(id,current_user.id)
     flash("Topic deleted successfully!","danger")
     return redirect(url_for("home"))    
 
@@ -71,10 +73,10 @@ def update(id):
         elif progress < 0 or progress > 100:
             flash("Invalid progress!","danger")
         else:
-            database.update_topic(id,topic,progress)
+            database.update_topic(id,topic,progress,current_user.id)
             flash("Topic updated successfully!","warning")
         return redirect(url_for("home"))
-    topic = database.get_topic(id)
+    topic = database.get_topic(id,current_user.id)
     return render_template("update.html", topic=topic)
 
 
@@ -90,8 +92,8 @@ def login():
     if request.method == "POST":
         email = request.form['email'].strip()
         password = request.form['password']
-        data = database.email_login(email,password)
-        if data:
+        data = database.get_user_by_email(email)
+        if data and check_password_hash(data[3],password):
             current_user = User(data[0],data[1],data[2])
             login_user(current_user)
             flash("Login Successful!", "success")
@@ -116,10 +118,21 @@ def signup():
         elif confirm_password != password:
             flash("Password and Confirm password don't matched!","danger")
         else:
-            database.add_user(name,email,password)
+            hashed_password = generate_password_hash(password)
+            database.add_user(name,email,hashed_password)
+            data = database.get_user_by_email(email)
+            user = User(data[0],data[1],data[2])
+            login_user(user)
             flash("Account created successfuly","success")
-            return render_template("login.html")
+            return redirect(url_for("home"))
     return render_template("signup.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out successfully!","success")
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)
