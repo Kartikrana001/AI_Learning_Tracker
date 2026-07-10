@@ -100,6 +100,16 @@ def login():
             return redirect(url_for("home"))
         flash("Incorrect email or password!","danger")
     return render_template("login.html")
+
+@app.route("/forgot_password")
+def forgot_password():
+    return render_template("forgot_password.html")
+@app.route("/otp_verify")
+def otp_verify():
+    return render_template("otp_verify.html")
+@app.route("/change_password")
+def change_password():
+    return render_template("change_password.html")
 @app.route("/signup",methods=["GET", "POST"])
 def signup():
     if request.method == "POST":

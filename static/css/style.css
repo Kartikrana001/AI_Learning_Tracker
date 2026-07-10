@@ -18,3 +18,11 @@ p{
 .btn{
     border-radius: 10px;
 }
+
+.otp-input{
+    width:55px;
+    height:55px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+}
