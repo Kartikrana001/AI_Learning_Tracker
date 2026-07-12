@@ -1,11 +1,21 @@
-from flask import Flask,render_template,request,redirect, url_for,flash
+from flask import Flask,render_template,request,redirect, url_for,flash,session
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
 from werkzeug.security import generate_password_hash,check_password_hash 
-import database
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
+import database,os
 database.create_table()
 database.user_login()
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = "learning_tracker_secret"
+
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+mail = Mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -101,14 +111,49 @@ def login():
         flash("Incorrect email or password!","danger")
     return render_template("login.html")
 
-@app.route("/forgot_password")
+@app.route("/forgot_password", methods = ["GET","POST"])
 def forgot_password():
+    if request.method == "POST":
+        email = request.form["email"].strip()
+        data =database.get_user_by_email(email)
+        if not data:
+            flash("Email Not Found!","danger")
+            return redirect(url_for("forgot_password"))
+        otp = generate_otp()
+        session["otp"] = otp
+        session["reset_email"] = email
+        session["otp_verified"] = False
+        print(email)
+        print(otp)
+        try:
+            send_otp(email,otp)
+            flash("OTP sent to your email.","success")
+        except Exception as e:
+            print(e)
+            flash(f"Mail error: {e}","danger")
+            return redirect(url_for("forget_password"))
+        return redirect(url_for("otp_verify"))
     return render_template("forgot_password.html")
-@app.route("/otp_verify")
+@app.route("/otp_verify",methods=["GET","POST"])
 def otp_verify():
+    if request.method == "POST":
+        otp = ""
+        for i in range(1, 7):
+            otp += request.form.get(f"otp{i}", "")
+        if otp == session.get("otp"):
+            session["otp_verified"] = True
+            session.pop("otp",None)
+            flash("OTP Verified Successfully!", "success")
+            return redirect(url_for("change_password"))
+        else:
+            flash("Invalid OTP!", "danger")
     return render_template("otp_verify.html")
-@app.route("/change_password")
+
+@app.route("/change_password",methods= ["GET","POST"])
 def change_password():
+    if not session.get("otp_verified"):
+        flash("Please verify OTP first!", "danger")
+        return redirect(url_for("forgot_password"))
     return render_template("change_password.html")
 @app.route("/signup",methods=["GET", "POST"])
 def signup():
@@ -143,6 +188,34 @@ def logout():
     logout_user()
     flash("Logged out successfully!","success")
     return redirect(url_for("login"))
+
+
+
+@app.route("/test_mail")
+def test_mail():
+    msg = Message(
+        subject="Flask Mail Test",
+        sender=app.config["MAIL_USERNAME"],
+        recipients=[app.config["MAIL_USERNAME"]])
+    msg.body = "Congratulations! Flask-Mail is working successfully."
+    mail.send(msg)
+    return "Email Sent Successfully!"
+
+
+def generate_otp():
+    import random
+    return f"{random.randint(0,999999):06d}"
+
+def send_otp(email,otp):
+    msg = Message(
+        subject="otp from AI_LEARNING_TRACKER",
+        sender = app.config["MAIL_USERNAME"],
+        recipients= [email]
+    )
+    msg.body  = f"Your OTP is {otp}"
+    mail.send(msg)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
