@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<body >
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg rounded-4 p-4" style="width: 500px;">
+        <h2 class="text-center mb-4">Enter OTP</h2>
+        <label for="email" class="form-label">OTP has been send to your Email</label>
+
+        <form method="POST">
+            <div class="d-flex justify-content-center gap-2 mb-3">
+                <input type="text" name="otp1" maxlength="1" class="form-control otp-input">
+                <input type="text" name="otp2" maxlength="1" class="form-control otp-input">
+                <input type="text" name="otp3" maxlength="1" class="form-control otp-input">
+                <input type="text" name="otp4" maxlength="1" class="form-control otp-input">
+                <input type="text" name="otp5" maxlength="1" class="form-control otp-input">
+                <input type="text" name="otp6" maxlength="1" class="form-control otp-input">
+            </div>
+        <script>
+            const inputs = document.querySelectorAll(".otp-input");
+            inputs.forEach((input,index)=>{
+            input.addEventListener("input",(e)=>{
+                input.value = input.value.replace(/[^0-9]/g,'');
+                if(input.value && index < inputs.length-1){
+                    inputs[index+1].focus();
+                }
+            });
+            input.addEventListener("keydown",(e)=>{
+                if(e.key==="Backspace" && input.value==="" && index>0){
+                    inputs[index-1].focus();
+                }
+            });
+            });
+            document.addEventListener("paste",(e)=>{
+                let data = (e.clipboardData || window.clipboardData)
+                    .getData("text")
+                    .replace(/\D/g,'');
+                if(data.length){
+                    inputs.forEach((input,i)=>{
+                        input.value = data[i] || "";
+                    });
+                    let last = Math.min(data.length-1, inputs.length-1);
+                    inputs[last].focus();
+                    e.preventDefault();
+                }
+            });
+        </script>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Verify OTP</button>
+        </form>
+    </div>
+</div>
+
+</body>
+{% endblock %}

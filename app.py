@@ -104,8 +104,8 @@ def login():
         password = request.form['password']
         data = database.get_user_by_email(email)
         if data and check_password_hash(data[3],password):
-            current_user = User(data[0],data[1],data[2])
-            login_user(current_user)
+            user = User(data[0],data[1],data[2])
+            login_user(user)
             flash("Login Successful!", "success")
             return redirect(url_for("home"))
         flash("Incorrect email or password!","danger")
@@ -125,13 +125,8 @@ def forgot_password():
         session["otp_verified"] = False
         print(email)
         print(otp)
-        try:
-            send_otp(email,otp)
-            flash("OTP sent to your email.","success")
-        except Exception as e:
-            print(e)
-            flash(f"Mail error: {e}","danger")
-            return redirect(url_for("forget_password"))
+        send_otp(email,otp)
+        flash("OTP sent to your email.","success")
         return redirect(url_for("otp_verify"))
     return render_template("forgot_password.html")
 @app.route("/otp_verify",methods=["GET","POST"])
@@ -168,19 +163,52 @@ def signup():
             flash("Invalid email!","danger")
         elif database.email_exists(email):
             flash("User already exists!","danger")
-        elif len(password) <8:
-            flash("Password must be greater then 8 digit!","danger")
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters!","danger")
         elif confirm_password != password:
             flash("Password and Confirm password don't matched!","danger")
         else:
-            hashed_password = generate_password_hash(password)
-            database.add_user(name,email,hashed_password)
-            data = database.get_user_by_email(email)
-            user = User(data[0],data[1],data[2])
-            login_user(user)
-            flash("Account created successfuly","success")
-            return redirect(url_for("home"))
+            session['signup_name'] = name
+            session['signup_email'] = email
+            session['signup_password'] = generate_password_hash(password)
+            otp = generate_otp()
+            session["signup_otp"] = otp
+            send_otp(email,otp)
+
+            return redirect(url_for("otp_signup"))
     return render_template("signup.html")
+
+@app.route("/otp_signup",methods=['GET','POST'])
+def otp_signup():
+
+    if "signup_otp" not in session:
+        flash("Please sign up first!", "danger")
+        return redirect(url_for("signup"))
+
+    if request.method == "POST":
+        otp = ""
+        for i in range(1, 7):
+            otp += request.form.get(f"otp{i}", "")
+
+        if otp == session.get("signup_otp"):
+
+            if database.email_exists(session["signup_email"]):
+                flash("Email already registered!", "danger")
+                return redirect(url_for("signup"))
+
+            database.add_user(session["signup_name"],session["signup_email"],session["signup_password"])
+            data = database.get_user_by_email(session["signup_email"])
+            user = User(data[0], data[1], data[2])
+            login_user(user)
+            flash("Account created successfully!","success")
+            session.pop("signup_otp",None)
+            session.pop("signup_name",None)
+            session.pop("signup_email",None)
+            session.pop("signup_password",None)
+            return redirect(url_for("home"))
+        else:
+            flash("Invalid OTP!", "danger")
+    return render_template("otp_signup.html")
 
 @app.route("/logout")
 @login_required
