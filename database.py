@@ -33,6 +33,12 @@ def get_user_by_email(email):
         cursor.execute("SELECT * FROM login_details WHERE email = ?",(email,)) 
         return cursor.fetchone() 
 
+def update_password(email, password):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE login_details SET password=? WHERE email=?",(password, email))
+
+
 
 def create_table():
     with sqlite3.connect("learning.db") as conn:
@@ -83,6 +89,3 @@ def topic_exists(topic,user_id):
         cursor.execute("SELECT * FROM topics WHERE topic = ? AND user_id = ?",(topic,user_id))
         result = cursor.fetchone()
         return result != None
-
-
-

@@ -1,0 +1,3 @@
+def generate_otp():
+    import random
+    return f"{random.randint(0,999999):06d}"

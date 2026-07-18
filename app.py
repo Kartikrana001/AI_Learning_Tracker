@@ -1,9 +1,13 @@
 from flask import Flask,render_template,request,redirect, url_for,flash,session
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
 from werkzeug.security import generate_password_hash,check_password_hash 
-from flask_mail import Mail, Message
+from flask_mail import Mail
+from utiles.mail import send_otp
 from dotenv import load_dotenv
-import database,os
+import database ,os
+from utiles.otp import generate_otp
+from routes.auth import auth
+
 database.create_table()
 database.user_login()
 load_dotenv()
@@ -19,7 +23,7 @@ mail = Mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = "auth.login"
 login_manager.login_message = None
 
 class User(UserMixin):
@@ -27,6 +31,8 @@ class User(UserMixin):
         self.id = id
         self.name = name
         self.email = email
+
+app.register_blueprint(auth)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -97,20 +103,6 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/login", methods=['POST','GET'])
-def login():
-    if request.method == "POST":
-        email = request.form['email'].strip()
-        password = request.form['password']
-        data = database.get_user_by_email(email)
-        if data and check_password_hash(data[3],password):
-            user = User(data[0],data[1],data[2])
-            login_user(user)
-            flash("Login Successful!", "success")
-            return redirect(url_for("home"))
-        flash("Incorrect email or password!","danger")
-    return render_template("login.html")
-
 @app.route("/forgot_password", methods = ["GET","POST"])
 def forgot_password():
     if request.method == "POST":
@@ -125,7 +117,7 @@ def forgot_password():
         session["otp_verified"] = False
         print(email)
         print(otp)
-        send_otp(email,otp)
+        send_otp(mail,app.config['MAIL_USERNAME'],email,otp)
         flash("OTP sent to your email.","success")
         return redirect(url_for("otp_verify"))
     return render_template("forgot_password.html")
@@ -149,101 +141,21 @@ def change_password():
     if not session.get("otp_verified"):
         flash("Please verify OTP first!", "danger")
         return redirect(url_for("forgot_password"))
+    if request.method == "POST":
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        if len(password) < 8:
+            flash("Password must be at least 8 characters!", "danger")
+        elif password != confirm_password:
+            flash("Passwords do not match!", "danger")
+        else:
+            hashed_password = generate_password_hash(password)
+            database.update_password(session["reset_email"],hashed_password)
+            session.pop("otp_verified", None)
+            session.pop("reset_email", None)
+            flash("Password changed successfully!", "success")
+            return redirect(url_for("auth.login"))
     return render_template("change_password.html")
-@app.route("/signup",methods=["GET", "POST"])
-def signup():
-    if request.method == "POST":
-        name = request.form['name'].strip()
-        email = request.form['email'].strip()
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-        if any(ch.isdigit() for ch in name) or name == "":
-            flash("Invalid user name!","danger")
-        elif "@" not in email:
-            flash("Invalid email!","danger")
-        elif database.email_exists(email):
-            flash("User already exists!","danger")
-        elif len(password) < 8:
-            flash("Password must be at least 8 characters!","danger")
-        elif confirm_password != password:
-            flash("Password and Confirm password don't matched!","danger")
-        else:
-            session['signup_name'] = name
-            session['signup_email'] = email
-            session['signup_password'] = generate_password_hash(password)
-            otp = generate_otp()
-            session["signup_otp"] = otp
-            send_otp(email,otp)
-
-            return redirect(url_for("otp_signup"))
-    return render_template("signup.html")
-
-@app.route("/otp_signup",methods=['GET','POST'])
-def otp_signup():
-
-    if "signup_otp" not in session:
-        flash("Please sign up first!", "danger")
-        return redirect(url_for("signup"))
-
-    if request.method == "POST":
-        otp = ""
-        for i in range(1, 7):
-            otp += request.form.get(f"otp{i}", "")
-
-        if otp == session.get("signup_otp"):
-
-            if database.email_exists(session["signup_email"]):
-                flash("Email already registered!", "danger")
-                return redirect(url_for("signup"))
-
-            database.add_user(session["signup_name"],session["signup_email"],session["signup_password"])
-            data = database.get_user_by_email(session["signup_email"])
-            user = User(data[0], data[1], data[2])
-            login_user(user)
-            flash("Account created successfully!","success")
-            session.pop("signup_otp",None)
-            session.pop("signup_name",None)
-            session.pop("signup_email",None)
-            session.pop("signup_password",None)
-            return redirect(url_for("home"))
-        else:
-            flash("Invalid OTP!", "danger")
-    return render_template("otp_signup.html")
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Logged out successfully!","success")
-    return redirect(url_for("login"))
-
-
-
-@app.route("/test_mail")
-def test_mail():
-    msg = Message(
-        subject="Flask Mail Test",
-        sender=app.config["MAIL_USERNAME"],
-        recipients=[app.config["MAIL_USERNAME"]])
-    msg.body = "Congratulations! Flask-Mail is working successfully."
-    mail.send(msg)
-    return "Email Sent Successfully!"
-
-
-def generate_otp():
-    import random
-    return f"{random.randint(0,999999):06d}"
-
-def send_otp(email,otp):
-    msg = Message(
-        subject="otp from AI_LEARNING_TRACKER",
-        sender = app.config["MAIL_USERNAME"],
-        recipients= [email]
-    )
-    msg.body  = f"Your OTP is {otp}"
-    mail.send(msg)
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
