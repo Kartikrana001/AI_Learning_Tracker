@@ -113,10 +113,8 @@ def forgot_password():
             return redirect(url_for("forgot_password"))
         otp = generate_otp()
         session["otp"] = otp
-        session["reset_email"] = email
+        session["reset_email"] = email.strip()
         session["otp_verified"] = False
-        print(email)
-        print(otp)
         send_otp(mail,app.config['MAIL_USERNAME'],email,otp)
         flash("OTP sent to your email.","success")
         return redirect(url_for("otp_verify"))
@@ -147,7 +145,7 @@ def change_password():
         if len(password) < 8:
             flash("Password must be at least 8 characters!", "danger")
         elif password != confirm_password:
-            flash("Passwords do not match!", "danger")
+            flash("Password and confirm password do not matched!", "danger")
         else:
             hashed_password = generate_password_hash(password)
             database.update_password(session["reset_email"],hashed_password)
