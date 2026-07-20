@@ -44,14 +44,13 @@ def load_user(user_id):
 @login_required
 def home():
     search = request.args.get("search")
-
+    stats = database.get_statistics(current_user.id)
     if search:
         tp = database.search_topic(search,current_user.id)
 
         if not tp:
             flash("Topic not found!", "danger")
             tp = database.view_topics(current_user.id)
-
     else:
         tp = database.view_topics(current_user.id)
     if request.method == "POST":
@@ -68,7 +67,7 @@ def home():
             flash("Topic added successfully!", "success")
 
         return redirect(url_for("home"))
-    return render_template("home.html", topics=tp)
+    return render_template("home.html", topics=tp , stats=stats)
 
 
 @app.route("/delete/<int:id>")

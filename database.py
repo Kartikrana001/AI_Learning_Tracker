@@ -89,3 +89,20 @@ def topic_exists(topic,user_id):
         cursor.execute("SELECT * FROM topics WHERE topic = ? AND user_id = ?",(topic,user_id))
         result = cursor.fetchone()
         return result != None
+
+def get_statistics(user_id):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM topics WHERE user_id=?",(user_id,))
+        total = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM topics WHERE progress=100 AND user_id=?",(user_id,))
+        completed = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM topics WHERE progress>0 AND progress<100 AND user_id=?",(user_id,))
+        in_progress = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM topics WHERE progress=0 AND user_id=?",(user_id,))
+        not_started = cursor.fetchone()[0]
+        cursor.execute("SELECT AVG(progress) FROM topics WHERE user_id=?",(user_id,))
+        overall_progress = cursor.fetchone()[0]
+        if overall_progress is None:
+            overall_progress = 0
+        return {"total": total,"completed": completed,"in_progress": in_progress,"not_started": not_started,"overall_progress": round(overall_progress, 2)}
