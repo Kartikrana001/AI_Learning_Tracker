@@ -31,62 +31,70 @@
 
     </form>
 
-<div class="container mt-4">
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="card shadow rounded-4 text-center">
-                <div class="card-body">
-                    <h5>Total Topics</h5>
-                    <h2>{{ stats.total }}</h2>
+    <div class="container mt-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="card shadow rounded-4 text-center">
+                    <div class="card-body">
+                        <h5>Total Topics</h5>
+                        <h2>{{ stats.total }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow rounded-4 text-center">
+                    <div class="card-body">
+                        <h5>Completed</h5>
+                        <h2>{{ stats.completed }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow rounded-4 text-center">
+                    <div class="card-body">
+                        <h5>In Progress</h5>
+                        <h2>{{ stats.in_progress }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow rounded-4 text-center">
+                    <div class="card-body">
+                        <h5>Not Started</h5>
+                        <h2>{{ stats.not_started }}</h2>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded-4 text-center">
-                <div class="card-body">
-                    <h5>Completed</h5>
-                    <h2>{{ stats.completed }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded-4 text-center">
-                <div class="card-body">
-                    <h5>In Progress</h5>
-                    <h2>{{ stats.in_progress }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded-4 text-center">
-                <div class="card-body">
-                    <h5>Not Started</h5>
-                    <h2>{{ stats.not_started }}</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col-md-12">
-            <div class="card shadow rounded-4">
-                <div class="card-body text-center">
-                    <h5>Overall Progress</h5>
-                    <div class="progress mt-3" style="height:30px;">
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            style="width: {{ stats.overall_progress }}%;"
-                            aria-valuenow="{{ stats.overall_progress }}"
-                            aria-valuemin="0"
-                            aria-valuemax="100">
-                            {{ stats.overall_progress }}%
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card shadow rounded-4">
+                    <div class="card-body text-center">
+                        <h5>Overall Progress</h5>
+                        <div class="progress mt-3" style="height:30px;">
+                            <div
+                                class="progress-bar"
+                                role="progressbar"
+                                style="width: {{ stats.overall_progress }}%;"
+                                aria-valuenow="{{ stats.overall_progress }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                                {{ stats.overall_progress }}%
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="card shadow rounded-4 mt-4 p-3">
+        <h4 class="text-center">Learning Progress</h4>
+
+        <div style="height:300px;">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
 
     <h2 class="mt-5">Topics</h2>
 
@@ -139,7 +147,26 @@
             {% endfor %}
         </tbody>
     </table>
-
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("progressChart");
+    new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: ["Completed", "In Progress", "Not Started"],
+            datasets: [{
+                data: [
+                    {{ chart_data.completed }},
+                    {{ chart_data.in_progress }},
+                    {{ chart_data.not_started }}
+                ],
+                backgroundColor: ["#28a745","#ffc107","#dc3545"]}]
+        }, 
+        options: {responsive: true,maintainAspectRatio: false}
+    });
+});
+</script>
 
 {% endblock %}

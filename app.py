@@ -2,10 +2,10 @@ from flask import Flask,render_template,request,redirect, url_for,flash,session
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
 from werkzeug.security import generate_password_hash,check_password_hash 
 from flask_mail import Mail
-from utiles.mail import send_otp
 from dotenv import load_dotenv
 import database ,os
 from utiles.otp import generate_otp
+from utiles.mail import send_otp
 from routes.auth import auth
 
 database.create_table()
@@ -45,6 +45,7 @@ def load_user(user_id):
 def home():
     search = request.args.get("search")
     stats = database.get_statistics(current_user.id)
+    chart_data = {"completed": stats["completed"],"in_progress": stats["in_progress"],"not_started": stats["not_started"]}
     if search:
         tp = database.search_topic(search,current_user.id)
 
@@ -67,7 +68,7 @@ def home():
             flash("Topic added successfully!", "success")
 
         return redirect(url_for("home"))
-    return render_template("home.html", topics=tp , stats=stats)
+    return render_template("home.html", topics=tp , stats=stats, chart_data=chart_data )
 
 
 @app.route("/delete/<int:id>")
