@@ -56,7 +56,7 @@ def home():
         tp = database.view_topics(current_user.id)
     if request.method == "POST":
         topic = request.form["topic"].strip()
-
+        category=request.form["category"]
         if topic == "":
             flash("Invalid topic!", "danger")
 
@@ -64,7 +64,7 @@ def home():
             flash("Topic already exists!", "danger")
 
         else:
-            database.add_topic(topic, 0,current_user.id)
+            database.add_topic(topic, 0,current_user.id,category)
             flash("Topic added successfully!", "success")
 
         return redirect(url_for("home"))
@@ -84,12 +84,14 @@ def update(id):
     if request.method == "POST":
         topic = request.form['topic'].strip()
         progress = float(request.form["progress"])
+        category = request.form["category"]
+
         if topic == "":
             flash("Invalid topic!","danger")
         elif progress < 0 or progress > 100:
             flash("Invalid progress!","danger")
         else:
-            database.update_topic(id,topic,progress,current_user.id)
+            database.update_topic(id,topic,progress,current_user.id,category)
             flash("Topic updated successfully!","warning")
         return redirect(url_for("home"))
     topic = database.get_topic(id,current_user.id)

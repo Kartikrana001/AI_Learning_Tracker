@@ -47,13 +47,14 @@ def create_table():
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             topic TEXT NOT NULL,
                             progress REAL NOT NULL,
+                            category TEXT DEFAULT 'General',
                             user_id INTEGER NOT NULL
                             )""")
     
-def add_topic(topic,progress,user_id):
+def add_topic(topic,progress,user_id,category):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO topics(topic,progress,user_id) VALUES(?,?,?)",(topic,progress,user_id))
+        cursor.execute("INSERT INTO topics(topic,progress,category,user_id) VALUES(?,?,?,?)",(topic,progress,category,user_id))
 
 def view_topics(user_id):
     with sqlite3.connect("learning.db") as conn:
@@ -62,10 +63,10 @@ def view_topics(user_id):
         c=cursor.fetchall()
         return c
 
-def update_topic(id,topic,progress,user_id):
+def update_topic(id,topic,progress,user_id,category):
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE topics SET topic=?, progress=? WHERE id= ? AND user_id = ?",(topic,progress,id,user_id))
+        cursor.execute("UPDATE topics SET topic=?, progress=? ,category=? WHERE id= ? AND user_id = ?",(topic,progress,category,id,user_id))
 
 def delete_topic(id , user_id):
     with sqlite3.connect("learning.db") as conn:
@@ -106,3 +107,8 @@ def get_statistics(user_id):
         if overall_progress is None:
             overall_progress = 0
         return {"total": total,"completed": completed,"in_progress": in_progress,"not_started": not_started,"overall_progress": round(overall_progress, 2)}
+
+
+with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM login_details WHERE name = ?",("Anmol Saxena",))
