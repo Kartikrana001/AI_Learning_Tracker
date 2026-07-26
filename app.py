@@ -43,17 +43,20 @@ def load_user(user_id):
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def home():
-    search = request.args.get("search")
+    search = request.args.get("search", "").strip()
+    category = request.args.get("category", "All")
     stats = database.get_statistics(current_user.id)
     chart_data = {"completed": stats["completed"],"in_progress": stats["in_progress"],"not_started": stats["not_started"]}
-    if search:
-        tp = database.search_topic(search,current_user.id)
 
-        if not tp:
-            flash("Topic not found!", "danger")
-            tp = database.view_topics(current_user.id)
-    else:
-        tp = database.view_topics(current_user.id)
+    tp = database.view_topics(current_user.id)
+    if search or category != "All":
+        if category != "All":
+            tp = [t for t in tp if t[4] == category]
+        else:
+            tp =  tp = database.search_topic(search, current_user.id)
+    if not tp:
+        flash("Topic not found!", "warning")
+         
     if request.method == "POST":
         topic = request.form["topic"].strip()
         category=request.form["category"]

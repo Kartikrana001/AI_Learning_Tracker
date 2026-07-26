@@ -47,8 +47,8 @@ def create_table():
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             topic TEXT NOT NULL,
                             progress REAL NOT NULL,
-                            category TEXT DEFAULT 'General',
-                            user_id INTEGER NOT NULL
+                            user_id INTEGER NOT NULL,
+                            category TEXT DEFAULT 'General'
                             )""")
     
 def add_topic(topic,progress,user_id,category):
@@ -109,6 +109,9 @@ def get_statistics(user_id):
         return {"total": total,"completed": completed,"in_progress": in_progress,"not_started": not_started,"overall_progress": round(overall_progress, 2)}
 
 
-with sqlite3.connect("learning.db") as conn:
+def filter_category(category,user_id):
+    with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM login_details WHERE name = ?",("Anmol Saxena",))
+        cursor.execute("SELECT * FROM topics WHERE category=? AND user_id =?",(category,user_id))
+        result =cursor.fetchall()
+        return result
