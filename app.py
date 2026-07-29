@@ -73,8 +73,18 @@ def home():
         return redirect(url_for("home"))
     return render_template("home.html", topics=tp , stats=stats, chart_data=chart_data )
 
+@login_required
+@app.route("/profile", methods=["GET","POST"])
+def profile():
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        email = request.form["email"].strip()
+        database.user_update(current_user.id,name,email)
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for("home"))
+    user = database.get_user_by_id(current_user.id)
+    return render_template("profile.html", user=user)
 
-@app.route("/delete/<int:id>")
 @login_required
 def delete(id):
     database.delete_topic(id,current_user.id)

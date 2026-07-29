@@ -38,8 +38,11 @@ def update_password(email, password):
         cursor = conn.cursor()
         cursor.execute("UPDATE login_details SET password=? WHERE email=?",(password, email))
 
-
-
+def user_update(user_id,name,email):
+    with sqlite3.connect("learning.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE login_details SET name=?, email=? WHERE id=?",(name,email,user_id))
+        
 def create_table():
     with sqlite3.connect("learning.db") as conn:
         cursor = conn.cursor()
@@ -115,3 +118,4 @@ def filter_category(category,user_id):
         cursor.execute("SELECT * FROM topics WHERE category=? AND user_id =?",(category,user_id))
         result =cursor.fetchall()
         return result
+
