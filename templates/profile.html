@@ -11,18 +11,51 @@
             class="form-control"
             value="{{ user[1] }}">
         <br>
-        <label>Email</label>
+
+        <label>Phone</label>
         <input
-            type="email"
-            name="email"
+            type="text"
+            name="phone"
             class="form-control"
-            value="{{ user[2] }}">
+            value="{{ user[4] }}">
         <br>
+
+        <label>College</label>
+        <input
+            type="text"
+            name="college"
+            class="form-control"
+            value="{{ user[5] }}">
+        <br>
+
+        <label>Branch</label>
+        <input
+            type="text"
+            name="branch"
+            class="form-control"
+            value="{{ user[6] }}">
+        <br>
+
+        <label>Year</label>
+        <input
+            type="text"
+            name="year"
+            class="form-control"
+            value="{{ user[7] }}">
+        <br>
+
+        <label>Bio</label>
+        <input
+            type="text"
+            name="bio"
+            class="form-control"
+            value="{{ user[9] }}">
+        <br>
+
 
         <button class="btn btn-success">
             Save Changes
         </button>
-
     </form>
 </div>
 {% endblock %}

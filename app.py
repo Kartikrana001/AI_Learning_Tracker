@@ -54,8 +54,7 @@ def home():
             tp = [t for t in tp if t[4] == category]
         else:
             tp =  tp = database.search_topic(search, current_user.id)
-    if not tp:
-        flash("Topic not found!", "warning")
+
          
     if request.method == "POST":
         topic = request.form["topic"].strip()
@@ -78,18 +77,23 @@ def home():
 def profile():
     if request.method == "POST":
         name = request.form["name"].strip()
-        email = request.form["email"].strip()
-        database.user_update(current_user.id,name,email)
+        phone = request.form["phone"].strip()
+        college = request.form["college"].strip()
+        branch = request.form["branch"].strip()
+        year = request.form["year"].strip()
+        bio = request.form["bio"].strip()
+        database.user_update(current_user.id,name,phone,college,branch,year,bio)
         flash("Profile updated successfully!", "success")
-        return redirect(url_for("home"))
+        return redirect(url_for("profile"))
     user = database.get_user_by_id(current_user.id)
     return render_template("profile.html", user=user)
 
+@app.route("/delete/<int:id>")
 @login_required
 def delete(id):
     database.delete_topic(id,current_user.id)
     flash("Topic deleted successfully!","danger")
-    return redirect(url_for("home"))    
+    return redirect(url_for("home"))
 
 @app.route("/update/<int:id>",methods=['POST','GET'])
 @login_required
